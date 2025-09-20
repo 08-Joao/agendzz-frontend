@@ -1,7 +1,7 @@
 'use client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeClosed, Letter, Lock } from '@solar-icons/react/ssr'
 import React, { useState } from 'react'
 
 function Signin() {
@@ -67,7 +67,7 @@ function Signin() {
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Letter weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                 <Input 
                   type="email"
                   placeholder="seu@email.com"
@@ -82,7 +82,7 @@ function Signin() {
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Senha</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Lock weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                 <Input 
                   type={showPassword ? "text" : "password"}
                   placeholder="Digite sua senha"
@@ -95,7 +95,7 @@ function Signin() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <Eye weight='BoldDuotone' className="w-5 h-5" /> : <EyeClosed weight='BoldDuotone' className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -164,13 +164,6 @@ function Signin() {
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Floating particles effect */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-primary/20 rounded-full animate-pulse"></div>
-        <div className="absolute top-3/4 right-1/4 w-3 h-3 bg-accent/20 rounded-full animate-pulse delay-700"></div>
-        <div className="absolute top-1/2 left-3/4 w-1 h-1 bg-chart-3/20 rounded-full animate-pulse delay-1000"></div>
       </div>
     </div>
   )

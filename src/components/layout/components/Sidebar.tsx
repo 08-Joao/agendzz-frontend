@@ -248,7 +248,7 @@ function Sidebar({ isOpen = true, onClose, currentPath = "/" }: SidebarProps) {
                                             const isItemCollapsed = isMenuItemCollapsed(itemKey)
 
                                             return (
-                                                <div key={option.name} className="space-y-1">
+                                                <div key={option.name} className="space-y-1 w-full">
                                                     <div className="flex items-center w-full">
                                                         <button
                                                             onClick={() => handleNavigate(option.page)}
