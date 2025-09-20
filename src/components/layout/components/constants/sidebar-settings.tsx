@@ -1,4 +1,4 @@
-import { ChatDots, ClipboardList, Database, Home, Settings } from "@solar-icons/react/ssr";
+import { ChatDots, ClipboardList, Database, Home, Settings, Letter, Calendar, MoneyBag } from "@solar-icons/react/ssr";
 
 interface ChildOption {
   name: string
@@ -18,13 +18,17 @@ interface MenuOptions {
   [categoryName: string]: CategoryOption[]
 }
 
-
 export const sidebarOptions: MenuOptions = {
   "Comunicação": [
     {
       name: "Chats",
       icon: <ChatDots weight='LineDuotone' size={20}/>,
       page: "/chats"
+    },
+    {
+      name: "Mensagens Programadas",
+      icon: <Letter weight='LineDuotone' size={20}/>,
+      page: "/mensagens"
     }
   ],
   "Organização": [
@@ -42,6 +46,16 @@ export const sidebarOptions: MenuOptions = {
       name: "Pontos",
       icon: <Database weight='LineDuotone' size={20}/>,
       page: "/pontos"
+    },
+    {
+      name: "Produtos",
+      icon: <MoneyBag weight='LineDuotone' size={20}/>,
+      page: "/produtos"
+    },
+    {
+      name: "Calendário",
+      icon: <Calendar weight='LineDuotone' size={20}/>,
+      page: "/calendario"
     },
     {
       name: "Configurações",
