@@ -1,26 +1,34 @@
 'use client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Eye, EyeClosed, Letter, Lock, User } from '@solar-icons/react/ssr'
+import { Calendar, Eye, EyeClosed, Letter, Lock, Phone, User } from '@solar-icons/react/ssr'
 import React, { useEffect, useState } from 'react'
 
 function Signup() {
   const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [birthDate, setBirthDate] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  useEffect(() => {
-    console.log('Batata')
-  },[email])
+  
+  const isFormValid =
+    name.trim() !== '' &&
+    email.trim() !== '' &&
+    birthDate.trim() !== '' &&
+    phone.trim() !== '' &&
+    password.trim() !== '' &&
+    confirmPassword.trim() !== '' &&
+    password == confirmPassword
 
   return (
-    <div className='min-h-screen w-full bg-gradient-to-br from-primary/5 via-accent/5 to-chart-3/5 flex items-center justify-center p-4'>
+    <div className='min-h-screen w-full bg-gradient-to-br from-primary/5 via-accent/5 to-chart-3/5 flex items-center justify-center p-8'>
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-slate-100/50 dark:bg-grid-slate-800/30 opacity-60"></div>
       
       {/* Floating Container */}
-      <div className="relative bg-card backdrop-blur-xl rounded-3xl shadow-2xl border border-border/20 p-8 w-full max-w-md mx-auto">
+      <div className="relative bg-card backdrop-blur-xl rounded-3xl shadow-2xl border border-border/20 p-8 w-230 ">
         {/* Decorative gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-chart-3/5 rounded-3xl"></div>
         
@@ -68,21 +76,48 @@ function Signup() {
 
           {/* Form */}
           <div className="space-y-6">
+            <div className="flex gap-6">
             {/* Name Field */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Nome</label>
-              <div className="relative">
-                <User weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-                <Input 
-                  type="text"
-                  placeholder="Seu Nome Aqui"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="pl-10 h-12 border-border focus:border-primary focus:ring-primary rounded-xl"
-                />
+              <div className="flex-1 space-y-2">
+                <label className="text-sm font-medium text-foreground">Nome</label>
+                <div className="relative">
+                  <User weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                  <Input 
+                    type="text"
+                    placeholder="Seu Nome Aqui"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="pl-10 h-12 border-border focus:border-primary focus:ring-primary rounded-xl w-110"
+                  />
+                </div>
+              </div>
+              <div className="flex-1 space-y-2">
+                <label className="text-sm font-medium text-foreground">Telefone</label>
+                <div className="relative">
+                  <Phone weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                  <Input 
+                    type="tel"
+                    placeholder="(99)98888-8888"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="pl-10 h-12 border-border focus:border-primary focus:ring-primary rounded-xl w-47"
+                  />
+                </div>
+              </div>
+              <div className="flex-1 space-y-2">
+                <label className="text-sm font-medium text-foreground">Data de Nascimento</label>
+                <div className="relative">
+                  <Calendar weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                  <Input 
+                    type="date"
+                    placeholder="dd/mm/aa"
+                    value={birthDate}
+                    onChange={(e) => setBirthDate(e.target.value)}
+                    className="pl-10 h-12 border-border focus:border-primary focus:ring-primary rounded-xl w-45"
+                  />
+                </div>
               </div>
             </div>
-
             {/* Email Field */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Email</label>
@@ -97,54 +132,57 @@ function Signup() {
                 />
               </div>
             </div>
-
+            
+            <div className="flex gap-6">
             {/* Password Field */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Senha</label>
-              <div className="relative">
-                <Lock weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-                <Input 
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Digite sua senha"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10 h-12 border-border focus:border-primary focus:ring-primary rounded-xl"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <Eye weight='BoldDuotone' className="w-5 h-5" /> : <EyeClosed weight='BoldDuotone' className="w-5 h-5" />}
-                </button>
+              <div className="flex-1 space-y-2">
+                <label className="text-sm font-medium text-foreground">Senha</label>
+                <div className="relative">
+                  <Lock weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                  <Input 
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Digite sua senha"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 pr-10 h-12 border-border focus:border-primary focus:ring-primary rounded-xl"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <Eye weight='BoldDuotone' className="w-5 h-5" /> : <EyeClosed weight='BoldDuotone' className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex-1 space-y-2">
+                <label className="text-sm font-medium text-foreground">Confirme a Senha</label>
+                <div className="relative">
+                  <Lock weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                  <Input 
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Confirme sua senha"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="pl-10 pr-10 h-12 border-border focus:border-primary focus:ring-primary rounded-xl"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <Eye weight='BoldDuotone' className="w-5 h-5" /> : <EyeClosed weight='BoldDuotone' className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
             </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Confirme a Senha</label>
-              <div className="relative">
-                <Lock weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-                <Input 
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Confirme sua senha"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="pl-10 pr-10 h-12 border-border focus:border-primary focus:ring-primary rounded-xl"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <Eye weight='BoldDuotone' className="w-5 h-5" /> : <EyeClosed weight='BoldDuotone' className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
             {/* Sign in Button */}
-            <Button className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
-              Cadastrar
-            </Button>
+            {isFormValid && (
+              <Button className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
+                Cadastrar
+              </Button>
+            )}
           </div>
         </div>
       </div>
