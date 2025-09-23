@@ -207,7 +207,7 @@ function Signup() {
         <div className="relative">
           <Lock weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
           <Input 
-            type={showPassword ? "text" : "password"}
+            type="password"
             placeholder="Confirme sua senha"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
