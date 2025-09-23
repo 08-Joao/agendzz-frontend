@@ -61,7 +61,6 @@ function Sidebar({ isOpen = true, onClose, currentPath = "/" }: SidebarProps) {
     const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set())
     const [collapsedMenuItems, setCollapsedMenuItems] = useState<Set<string>>(new Set())
     const [organizationName] = useState("Minha Organização")
-    const [userName] = useState("João Silva")
 
     const iniciais = generateInitials(organizationName)
 
@@ -306,20 +305,6 @@ function Sidebar({ isOpen = true, onClose, currentPath = "/" }: SidebarProps) {
                                 </div>
                             )
                         })}
-                    </div>
-                    <div className="mt-auto pt-4 border-t border-border/20">
-                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-secondary/30 backdrop-blur-sm border border-border/10">
-                            <div className="w-10 h-10 bg-gradient-to-br from-accent to-chart-3 rounded-xl flex items-center justify-center text-sm text-primary-foreground font-bold">
-                                {generateInitials(userName)}
-                            </div>
-
-                            {isDesktopOpen && (
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-foreground truncate">{userName}</p>
-                                    <p className="text-xs text-muted-foreground truncate">Online</p>
-                                </div>
-                            )}
-                        </div>
                     </div>
                 </div>
             </div>
