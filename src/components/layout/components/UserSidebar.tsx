@@ -1,7 +1,8 @@
 'use client'
 import React from 'react'
 import { Button } from '@/components/ui/button'
-import { X, Settings, User, Bell, Shield, HelpCircle, LogOut, Mail, Phone } from 'lucide-react'
+import { Letter, Logout, Phone, QuestionCircle, Settings, Shield, User } from '@solar-icons/react/ssr'
+import { X } from 'lucide-react'
 
 interface UserSidebarProps {
     isOpen: boolean
@@ -47,14 +48,6 @@ function UserSidebar({ isOpen, onClose, userName }: UserSidebarProps) {
             }
         },
         {
-            icon: <Bell size={20} />,
-            label: "Notificações",
-            action: () => {
-                console.log("Navegar para notificações")
-                onClose()
-            }
-        },
-        {
             icon: <Shield size={20} />,
             label: "Privacidade e Segurança",
             action: () => {
@@ -63,7 +56,7 @@ function UserSidebar({ isOpen, onClose, userName }: UserSidebarProps) {
             }
         },
         {
-            icon: <HelpCircle size={20} />,
+            icon: <QuestionCircle size={20} />,
             label: "Ajuda e Suporte",
             action: () => {
                 console.log("Navegar para ajuda")
@@ -115,7 +108,7 @@ function UserSidebar({ isOpen, onClose, userName }: UserSidebarProps) {
                         </div>
                         <h3 className="text-lg font-semibold text-foreground mb-1">{userName}</h3>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                            <Mail size={14} />
+                            <Letter size={14} />
                             <span>{userEmail}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -146,7 +139,7 @@ function UserSidebar({ isOpen, onClose, userName }: UserSidebarProps) {
                             onClick={handleLogout}
                             className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 backdrop-blur-sm border border-transparent hover:bg-red-50 dark:hover:bg-red-950/20 hover:border-red-200 dark:hover:border-red-800/30 text-red-600 hover:text-red-700 dark:hover:text-red-500"
                         >
-                            <LogOut size={20} />
+                            <Logout size={20} />
                             <span>Sair da Conta</span>
                         </button>
                     </div>

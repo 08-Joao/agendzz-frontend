@@ -1,5 +1,6 @@
 'use client'
 import UserSidebar from '@/components/layout/components/UserSidebar'
+import { Bell } from '@solar-icons/react/ssr'
 import React, { useState } from 'react'
 
 // Generate initials from name
@@ -30,10 +31,14 @@ export default function Navbar() {
         <div>
           <h1 className="text-xl font-bold">Dashboard</h1>
         </div>
+        
         <div className="flex items-center space-x-4">
+          <button className="relative rounded-full p-2 text-muted-foreground transition-colors hover:text-foreground focus:outline-none"aria-label="Ver notificações">
+            <Bell size={20} />
+          </button>
+
           <p className="hidden sm:block">Bem-vindo, {userName.split(' ')[0]}!</p>
           
-          {/* Avatar do usuário clicável */}
           <button
             onClick={toggleUserSidebar}
             className="w-10 h-10 bg-gradient-to-br from-accent to-chart-3 rounded-xl flex items-center justify-center text-sm text-primary-foreground font-bold hover:scale-105 transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50"

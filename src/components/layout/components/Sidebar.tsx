@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ChevronDown, ChevronRight, ChevronLeft, Menu, Settings, LogOut, Home, MessageCircle, ClipboardList, Database, Lightbulb } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { sidebarOptions } from './constants/sidebar-settings'
+import { SendSquare, SidebarCode } from '@solar-icons/react/ssr'
 
 interface SidebarProps {
     isOpen?: boolean
@@ -204,7 +205,7 @@ function Sidebar({ isOpen = true, onClose, currentPath = "/" }: SidebarProps) {
                                     onClick={toggleSidebar}
                                     className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-xl h-10 w-10 backdrop-blur-sm"
                                 >
-                                    {isDesktopOpen ? <ChevronLeft size={18} /> : <Menu size={18} />}
+                                    {isDesktopOpen ? <SendSquare size={18} /> : <SidebarCode size={18} />}
                                 </Button>
                             </div>
                         </div>
