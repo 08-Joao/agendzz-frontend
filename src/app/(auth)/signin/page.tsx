@@ -2,13 +2,14 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Eye, EyeClosed, Letter, Lock } from '@solar-icons/react/ssr'
+import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 
 function Signin() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-
+  const router = useRouter()
   return (
     <div className='min-h-screen w-full bg-gradient-to-br from-primary/5 via-accent/5 to-chart-3/5 flex items-center justify-center p-4'>
       {/* Background Pattern */}
@@ -156,12 +157,14 @@ function Signin() {
             </div>
 
             {/* Sign up link */}
-            <p className="text-center text-sm text-muted-foreground mt-6">
-              Não tem uma conta?{' '}
-              <a href="#" className="text-primary hover:text-primary/80 font-semibold">
-                Cadastre-se aqui
-              </a>
+            <div className="flex justify-center items-center gap-1">
+            <p className="text-center text-sm text-muted-foreground">
+              Não tem uma conta?
             </p>
+              <button onClick={() => router.push("/signup")} className="text-primary hover:text-primary/80">
+                Cadastre-se aqui
+              </button>
+            </div>
           </div>
         </div>
       </div>
