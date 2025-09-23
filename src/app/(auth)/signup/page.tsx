@@ -207,7 +207,7 @@ function Signup() {
         <div className="relative">
           <Lock weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
           <Input 
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Confirme sua senha"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -412,7 +412,7 @@ function Signup() {
           )}
 
           {/* Sign in link */}
-          <div className="flex justify-center items-center gap-1">
+          <div className="flex justify-center items-center gap-1 mt-6">
             <p className="text-center text-sm text-muted-foreground">
               Já tem uma conta?
             </p>
