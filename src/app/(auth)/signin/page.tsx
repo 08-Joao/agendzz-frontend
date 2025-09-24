@@ -1,6 +1,7 @@
 'use client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import Api from '@/services/Api'
 import { Eye, EyeClosed, Letter, Lock } from '@solar-icons/react/ssr'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
@@ -10,6 +11,21 @@ function Signin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const router = useRouter()
+
+
+  const handleSignin = async () => {
+    try {
+      const response = await Api.signin({ email, password })
+
+      if(response){
+        router.push('/dashboard')
+      }
+    } catch(e){
+      console.log(e)
+    }
+  }
+
+
   return (
     <div className='min-h-screen w-full bg-gradient-to-br from-primary/5 via-accent/5 to-chart-3/5 flex items-center justify-center p-4'>
       {/* Background Pattern */}
@@ -116,7 +132,7 @@ function Signin() {
             </div>
 
             {/* Sign in Button */}
-            <Button className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
+            <Button onClick={handleSignin} className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
               Entrar
             </Button>
 
