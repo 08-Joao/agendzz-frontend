@@ -1,6 +1,7 @@
 'use client'
 import UserSidebar from '@/components/layout/components/UserSidebar'
 import { Bell } from '@solar-icons/react/ssr'
+import Link from 'next/link'
 import React, { useState } from 'react'
 
 // Generate initials from name

@@ -2,7 +2,9 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Api from '@/services/Api'
-import { Calendar, Eye, EyeClosed, Letter, Lock, Phone, User, ArrowLeft, ArrowRight } from '@solar-icons/react/ssr'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { CalendarDate, Eye, EyeClosed, Letter, Lock, Phone, User, ArrowLeft, ArrowRight } from '@solar-icons/react/ssr'
+import { Calendar } from "@/components/ui/calendar"
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 
@@ -16,6 +18,72 @@ function Signup() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [acceptTerms, setAcceptTerms] = useState(false)
+  const [date, setDate] = React.useState<Date | undefined>(new Date())
+
+  // Validações específicas
+  const validateName = (name: string) => {
+    const nameRegex = /^[a-zA-ZÀ-ÿ\s]+$/
+    const isValid = nameRegex.test(name) && name.trim().length >= 2
+    return {
+      isValid,
+      message: !isValid && name.length > 0 ? 'Nome deve conter apenas letras e espaços' : ''
+    }
+  }
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const isValid = emailRegex.test(email)
+    return {
+      isValid,
+      message: !isValid && email.length > 0 ? 'Email deve ter um formato válido' : ''
+    }
+  }
+
+  const formatPhone = (value: string) => {
+    // Remove tudo que não é número
+    const numbers = value.replace(/\D/g, '')
+    
+    // Limita a 11 dígitos
+    const limitedNumbers = numbers.slice(0, 11)
+    
+    // Aplica a formatação (XX)XXXXX-XXXX
+    if (limitedNumbers.length <= 2) {
+      return limitedNumbers.length > 0 ? `(${limitedNumbers}` : ''
+    } else if (limitedNumbers.length <= 7) {
+      return `(${limitedNumbers.slice(0, 2)})${limitedNumbers.slice(2)}`
+    } else {
+      return `(${limitedNumbers.slice(0, 2)})${limitedNumbers.slice(2, 7)}-${limitedNumbers.slice(7)}`
+    }
+  }
+
+  const validatePhone = (phone: string) => {
+    // Remove formatação para validar apenas os números
+    const numbers = phone.replace(/\D/g, '')
+    
+    // Valida se tem 11 dígitos, se o DDD é válido e se o primeiro dígito do número é 9
+    const hasCorrectLength = numbers.length === 11
+    const hasValidDDD = hasCorrectLength && parseInt(numbers.slice(0, 2)) >= 11 && parseInt(numbers.slice(0, 2)) <= 99
+    const startsWithNine = hasCorrectLength && numbers[2] === '9'
+    
+    const isValid = hasCorrectLength && hasValidDDD && startsWithNine
+    
+    let message = ''
+    if (numbers.length > 0 && !isValid) {
+      if (!hasCorrectLength) {
+        message = 'Telefone deve ter 11 dígitos'
+      } else if (!hasValidDDD) {
+        message = 'DDD inválido'
+      } else if (!startsWithNine) {
+        message = 'Número deve começar com 9'
+      }
+    }
+    
+    return {
+      isValid,
+      message,
+      cleanNumber: numbers
+    }
+  }
 
   // Função para validar senha
   const validatePassword = (password: string) => {
@@ -35,12 +103,16 @@ function Signup() {
     }
   }
 
+  // Aplicar validações
+  const nameValidation = validateName(name)
+  const emailValidation = validateEmail(email)
+  const phoneValidation = validatePhone(phone)
   const passwordValidation = validatePassword(password)
   const isPasswordMatch = password === confirmPassword && confirmPassword !== ''
 
   // Validações por etapa
-  const isStep1Valid = name.trim() !== '' && email.trim() !== ''
-  const isStep2Valid = phone.trim() !== '' && birthDate.trim() !== ''
+  const isStep1Valid = nameValidation.isValid && name.trim() !== '' && emailValidation.isValid && email.trim() !== ''
+  const isStep2Valid = phoneValidation.isValid && birthDate.trim() !== ''
   const isStep3Valid = passwordValidation.isValid && isPasswordMatch && acceptTerms
 
   const canProceedToNext = () => {
@@ -71,7 +143,7 @@ function Signup() {
     try {
       const response = await Api.signup({
         name,
-        phoneNumber: phone,
+        phoneNumber: phoneValidation.cleanNumber, // Envia apenas os números limpos
         birthDate: new Date(birthDate),
         email,
         password
@@ -83,6 +155,21 @@ function Signup() {
     } catch (e) {
       console.log(e)
     }
+  }
+
+  // Handlers para inputs com validação
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    // Permite apenas letras, espaços e acentos
+    if (value === '' || /^[a-zA-ZÀ-ÿ\s]*$/.test(value)) {
+      setName(value)
+    }
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    const formatted = formatPhone(value)
+    setPhone(formatted)
   }
 
   const renderStepIndicator = () => (
@@ -116,7 +203,6 @@ function Signup() {
     <div className="space-y-6">
       <div className="text-center mb-8">
         <h2 className='text-2xl font-bold text-foreground mb-2'>Informações Básicas</h2>
-        <p className='text-muted-foreground'>Vamos começar com seus dados pessoais</p>
       </div>
 
       {/* Name Field */}
@@ -128,10 +214,15 @@ function Signup() {
             type="text"
             placeholder="Digite seu nome completo"
             value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="pl-10 h-12 border-border focus:border-primary focus:ring-primary rounded-xl"
+            onChange={handleNameChange}
+            className={`pl-10 h-12 border-border focus:border-primary focus:ring-primary rounded-xl ${
+              nameValidation.message ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+            }`}
           />
         </div>
+        {nameValidation.message && (
+          <p className="text-sm text-red-500">{nameValidation.message}</p>
+        )}
       </div>
 
       {/* Email Field */}
@@ -144,9 +235,14 @@ function Signup() {
             placeholder="seu@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="pl-10 h-12 border-border focus:border-primary focus:ring-primary rounded-xl"
+            className={`pl-10 h-12 border-border focus:border-primary focus:ring-primary rounded-xl ${
+              emailValidation.message ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+            }`}
           />
         </div>
+        {emailValidation.message && (
+          <p className="text-sm text-red-500">{emailValidation.message}</p>
+        )}
       </div>
     </div>
   )
@@ -155,7 +251,6 @@ function Signup() {
     <div className="space-y-6">
       <div className="text-center mb-8">
         <h2 className='text-2xl font-bold text-foreground mb-2'>Dados de Contato</h2>
-        <p className='text-muted-foreground'>Precisamos de algumas informações adicionais</p>
       </div>
 
       {/* Phone Field */}
@@ -165,26 +260,42 @@ function Signup() {
           <Phone weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
           <Input
             type="tel"
-            placeholder="(99) 98888-8888"
+            placeholder="(XX)XXXXX-XXXX"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="pl-10 h-12 border-border focus:border-primary focus:ring-primary rounded-xl"
+            onChange={handlePhoneChange}
+            className={`pl-10 h-12 border-border focus:border-primary focus:ring-primary rounded-xl ${
+              phoneValidation.message ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+            }`}
           />
         </div>
+        {phoneValidation.message && (
+          <p className="text-sm text-red-500">{phoneValidation.message}</p>
+        )}
       </div>
 
       {/* Birth Date Field */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-foreground">Data de Nascimento</label>
-        <div className="relative">
-          <Calendar weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-          <Input
-            type="date"
-            value={birthDate}
-            onChange={(e) => setBirthDate(e.target.value)}
-            className="pl-10 h-12 border-border focus:border-primary focus:ring-primary rounded-xl"
-          />
-        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <div className="relative">
+              <CalendarDate weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <Input
+                value={date ? date.toLocaleDateString('pt-BR') : ""}
+                placeholder='dd/mm/aaaa'
+                readOnly
+                className='pl-10 cursor-pointer'
+              />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent>
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={setDate}
+            />
+          </PopoverContent>
+        </Popover>
       </div>
     </div>
   )
