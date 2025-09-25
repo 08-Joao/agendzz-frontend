@@ -12,13 +12,15 @@ function Signup() {
   const [currentStep, setCurrentStep] = useState(1)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [birthDate, setBirthDate] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [date, setDate] = React.useState<Date | undefined>(new Date())
+  const currentYear = new Date().getFullYear();
+  const fromYear = currentYear - 100;
+  const toYear = currentYear;
 
   // Validações específicas
   const validateName = (name: string) => {
@@ -63,9 +65,8 @@ function Signup() {
     // Valida se tem 11 dígitos, se o DDD é válido e se o primeiro dígito do número é 9
     const hasCorrectLength = numbers.length === 11
     const hasValidDDD = hasCorrectLength && parseInt(numbers.slice(0, 2)) >= 11 && parseInt(numbers.slice(0, 2)) <= 99
-    const startsWithNine = hasCorrectLength && numbers[2] === '9'
     
-    const isValid = hasCorrectLength && hasValidDDD && startsWithNine
+    const isValid = hasCorrectLength && hasValidDDD
     
     let message = ''
     if (numbers.length > 0 && !isValid) {
@@ -73,8 +74,6 @@ function Signup() {
         message = 'Telefone deve ter 11 dígitos'
       } else if (!hasValidDDD) {
         message = 'DDD inválido'
-      } else if (!startsWithNine) {
-        message = 'Número deve começar com 9'
       }
     }
     
@@ -112,7 +111,7 @@ function Signup() {
 
   // Validações por etapa
   const isStep1Valid = nameValidation.isValid && name.trim() !== '' && emailValidation.isValid && email.trim() !== ''
-  const isStep2Valid = phoneValidation.isValid && birthDate.trim() !== ''
+  const isStep2Valid = phoneValidation.isValid && date !== undefined
   const isStep3Valid = passwordValidation.isValid && isPasswordMatch && acceptTerms
 
   const canProceedToNext = () => {
@@ -140,22 +139,28 @@ function Signup() {
   const router = useRouter()
 
   const handleSignup = async () => {
+  
+    if (!date) {
+      console.error("Tentativa de cadastro sem data de nascimento!");
+      return;
+    }
+
     try {
       const response = await Api.signup({
         name,
-        phoneNumber: phoneValidation.cleanNumber, // Envia apenas os números limpos
-        birthDate: new Date(birthDate),
+        phoneNumber: phoneValidation.cleanNumber,
+        birthDate: date,
         email,
         password
-      })
+      });
 
       if (response) {
-        router.push('/dashboard')
+        router.push('/dashboard');
       }
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
-  }
+  };
 
   // Handlers para inputs com validação
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -274,29 +279,33 @@ function Signup() {
       </div>
 
       {/* Birth Date Field */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Data de Nascimento</label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <div className="relative">
-              <CalendarDate weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-              <Input
-                value={date ? date.toLocaleDateString('pt-BR') : ""}
-                placeholder='dd/mm/aaaa'
-                readOnly
-                className='pl-10 cursor-pointer'
-              />
-            </div>
-          </PopoverTrigger>
-          <PopoverContent>
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-foreground">Data de Nascimento</label>
+      <Popover>
+        <PopoverTrigger asChild>
+          <div className="relative">
+            <CalendarDate weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+            <Input
+              value={date ? date.toLocaleDateString('pt-BR') : ""}
+              placeholder='dd/mm/aaaa'
+              readOnly
+              className='pl-10 cursor-pointer'
             />
-          </PopoverContent>
-        </Popover>
-      </div>
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0">
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={setDate}
+            captionLayout="dropdown"
+            fromYear={fromYear}
+            toYear={toYear}
+            defaultMonth={date || new Date(currentYear - 18, 0)}
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
     </div>
   )
 
@@ -335,7 +344,7 @@ function Signup() {
         <div className="relative">
           <Lock weight='BoldDuotone' className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
           <Input
-            type={showPassword ? "text" : "password"}
+            type={showPassword ? "password" : "password"}
             placeholder="Confirme sua senha"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
