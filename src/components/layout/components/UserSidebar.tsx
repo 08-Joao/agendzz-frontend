@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import { Button } from '@/components/ui/button'
-import { Letter, Logout, Phone, QuestionCircle, Settings, Shield, User } from '@solar-icons/react/ssr'
+import { Letter, Logout, Phone, QuestionCircle, Settings, Shield, User, CheckRead, TrashBinTrash } from '@solar-icons/react/ssr'
 import { X } from 'lucide-react'
 
 interface UserSidebarProps {
