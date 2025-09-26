@@ -14,13 +14,13 @@ export default function Home() {
         {/* Header Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Welcome Card */}
-          <div className="bg-gradient-to-r from-gray-200 to-gray-300 rounded-2xl p-8 text-white relative overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-8 text-white relative overflow-hidden">
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-2xl">👋</span>
-                <h1 className="text-2xl text-black font-bold">Bem-vindo de volta!</h1>
+                <h1 className="text-2xl font-bold">Bem-vindo de volta!</h1>
               </div>
-              <p className="text-black mb-6 max-w-md">
+              <p className="text-gray-300 mb-6 max-w-md">
                 Você tem X agendamentos hoje.
               </p>
               <button className="bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2">
