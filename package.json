@@ -27,6 +27,7 @@
     "react-day-picker": "^9.11.0",
     "react-dom": "19.1.0",
     "shadcn": "^3.3.1",
+    "socket.io-client": "^4.8.1",
     "solar-icon-set": "^2.0.1",
     "tailwind-merge": "^3.3.1"
   },

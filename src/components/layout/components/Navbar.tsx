@@ -1,6 +1,6 @@
 'use client'
 import UserSidebar from '@/components/layout/components/UserSidebar'
-import NotificationSidebar from '@/components/layout/components/Notfy-Sidebar'
+import NotificationSidebar from '@/components/layout/components/NotificationSidebar'
 import { Bell } from '@solar-icons/react/ssr'
 import Link from 'next/link'
 import React, { useState } from 'react'
