@@ -1,13 +1,15 @@
 'use client'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Letter, Logout, Phone, QuestionCircle, Settings, Shield, User, CheckRead, TrashBinTrash } from '@solar-icons/react/ssr'
 import { X } from 'lucide-react'
+import Api from '@/services/Api'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/context/AuthContext'
 
 interface UserSidebarProps {
     isOpen: boolean
     onClose: () => void
-    userName: string
 }
 
 // Generate initials from name
@@ -20,15 +22,16 @@ const generateInitials = (name: string): string => {
         .substring(0, 2)
 }
 
-function UserSidebar({ isOpen, onClose, userName }: UserSidebarProps) {
-    const userEmail = "joao@exemplo.com" // Você pode tornar isso uma prop também
-    const userPhone = "+55 (11) 99999-9999" // Você pode tornar isso uma prop também
+function UserSidebar({ isOpen, onClose }: UserSidebarProps) {
+    const { user } = useAuth()
 
-    const handleLogout = () => {
-        console.log("Logout")
-        // Implement logout logic
+    const router = useRouter()
+    const { signout } = useAuth()
+    const handleLogout = async () => {
+        signout()
         onClose()
     }
+
 
     const menuItems = [
         {
@@ -104,16 +107,16 @@ function UserSidebar({ isOpen, onClose, userName }: UserSidebarProps) {
                     {/* User Info */}
                     <div className="flex flex-col items-center mb-8 p-6 rounded-2xl bg-secondary/30 backdrop-blur-sm border border-border/10">
                         <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center text-lg text-primary-foreground font-bold shadow-lg mb-4">
-                            {generateInitials(userName)}
+                            {generateInitials(user?.name || 'João Silva')}
                         </div>
-                        <h3 className="text-lg font-semibold text-foreground mb-1">{userName}</h3>
+                        <h3 className="text-lg font-semibold text-foreground mb-1">{user?.name || 'João Silva'}</h3>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                             <Letter size={14} />
-                            <span>{userEmail}</span>
+                            <span>{user?.email || 'joao@example.com'}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Phone size={14} />
-                            <span>{userPhone}</span>
+                            <span>{user?.phoneNumber || '(99) 99999-9999'}</span>
                         </div>
                     </div>
 

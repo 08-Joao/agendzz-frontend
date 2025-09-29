@@ -279,7 +279,7 @@ export function GenericStepperModal<T extends Record<string, any>>({
                   
                   <div className="mt-2 text-center">
                     <p className={`text-xs font-medium ${
-                      index <= currentStep ? 'text-text-primary' : 'text-muted-foreground'
+                      index <= currentStep ? 'text-text' : 'text-muted-foreground'
                     }`}>
                       {step.title}
                     </p>

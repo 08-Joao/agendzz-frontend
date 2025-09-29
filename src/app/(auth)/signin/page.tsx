@@ -1,6 +1,7 @@
 'use client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useAuth } from '@/context/AuthContext'
 import Api from '@/services/Api'
 import { Eye, EyeClosed, Letter, Lock } from '@solar-icons/react/ssr'
 import { useRouter } from 'next/navigation'
@@ -11,18 +12,10 @@ function Signin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const router = useRouter()
-
+  const { signin } = useAuth()
 
   const handleSignin = async () => {
-    try {
-      const response = await Api.signin({ email, password })
-
-      if(response){
-        router.push('/dashboard')
-      }
-    } catch(e){
-      console.log(e)
-    }
+    signin(email, password)
   }
 
 

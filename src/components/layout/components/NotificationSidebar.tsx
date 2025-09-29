@@ -1,28 +1,51 @@
 'use client'
 
 import { NotificationEntity } from '@/entities/notification.entity'
+import { NotificationType } from '@/enums/notificationType'
 import Api from '@/services/Api'
+import { Button } from '@/components/ui/button'
 import React, { useEffect, useState, useRef } from 'react'
 import { io, Socket } from 'socket.io-client'
-import { Bell, Check, X, Users, Calendar, Clock, ChevronRight } from 'lucide-react'
+import { 
+  Bell, 
+  Check, 
+  X, 
+  Users, 
+  Calendar, 
+  Clock,
+  Info
+} from 'lucide-react'
+import { CheckRead, TrashBin2 } from '@solar-icons/react/ssr'
 
-function NotificationsSidebar() {
+interface NotificationSidebarProps {
+  isOpen: boolean
+  onClose: () => void
+}
+
+function NotificationSidebar({ isOpen, onClose }: NotificationSidebarProps) {
   const [notifications, setNotifications] = useState<NotificationEntity[]>([])
   const [isConnected, setIsConnected] = useState(false)
   const [loadingActions, setLoadingActions] = useState<string[]>([])
-  const [count, setCount] = useState(0)
   const socketRef = useRef<Socket | null>(null)
 
+  const fetchNotifications = async () => {
+    const response = await Api.getUserNotifications()
+
+    if(response && response.data) {
+      setNotifications(response.data)
+    }
+  }
+
   useEffect(() => {
+    if(!notifications.length) {
+      fetchNotifications()
+    }
+
     // Configurações do socket para reduzir logs de erro
     const socket = io('http://localhost:4000/notifications', {
-      // Reduz tentativas de reconexão
       reconnectionAttempts: 3,
-      // Aumenta intervalo entre tentativas
       reconnectionDelay: 5000,
-      // Timeout menor para falhar mais rápido
       timeout: 3000,
-      // Desabilita logs automáticos do socket.io
       forceNew: true,
       withCredentials: true
     })
@@ -30,32 +53,25 @@ function NotificationsSidebar() {
     socketRef.current = socket
 
     socket.on('connect', () => {
-      console.log('✅ Conectado ao gateway de notificações!')
       setIsConnected(true)
     })
 
-    socket.on('message', (newNotification: NotificationEntity) => {
-      console.log('Nova notificação recebida:', newNotification)
+    socket.on('notification', (newNotification: NotificationEntity) => {
       setNotifications((prevNotifications) => [newNotification, ...prevNotifications])
     })
 
     socket.on('disconnect', (reason) => {
-      console.log('❌ Desconectado do gateway de notificações. Motivo:', reason)
       setIsConnected(false)
     })
 
-    // Captura erros de conexão sem loggar no console
     socket.on('connect_error', (error) => {
-      // Você pode logar apenas em desenvolvimento ou remover completamente
       if (process.env.NODE_ENV === 'development') {
         console.warn('Erro de conexão com o gateway (modo silencioso):', error.message)
       }
       setIsConnected(false)
     })
 
-    // Silencia erros de reconexão
     socket.on('reconnect_error', (error) => {
-      // Log silencioso ou removido completamente
       if (process.env.NODE_ENV === 'development') {
         console.warn('Erro de reconexão (modo silencioso):', error.message)
       }
@@ -67,21 +83,6 @@ function NotificationsSidebar() {
     }
   }, [])
 
-  // useEffect para enviar mensagem quando count mudar
-  useEffect(() => {
-    // Só envia se o count for maior que 0 e o socket estiver conectado
-    if (count > 0 && socketRef.current && isConnected) {
-      const testMessage = {
-        type: 'test_count_update',
-        count: count,
-        timestamp: new Date().toISOString(),
-        message: `Contador atualizado para ${count}`
-      }
-      
-      console.log('📤 Enviando mensagem de teste para o servidor:', testMessage)
-      socketRef.current.emit('message', testMessage)
-    }
-  }, [count, isConnected])
 
   const handleAccept = async (actionUrl: string, notificationId: string) => {
     setLoadingActions(prev => [...prev, notificationId])
@@ -89,7 +90,6 @@ function NotificationsSidebar() {
       const response = await Api.acceptInvitation(actionUrl)
       if (response) {
         console.log('Notificação aceita com sucesso!')
-        // Remove a notificação da lista após aceitar
         setNotifications(prev => prev.filter(n => n.id !== notificationId))
       }
     } catch (error) {
@@ -105,7 +105,6 @@ function NotificationsSidebar() {
       const response = await Api.declineInvitation(actionUrl)
       if (response) {
         console.log('Notificação rejeitada com sucesso!')
-        // Remove a notificação da lista após rejeitar
         setNotifications(prev => prev.filter(n => n.id !== notificationId))
       }
     } catch (error) {
@@ -123,14 +122,34 @@ function NotificationsSidebar() {
     )
   }
 
-  const getNotificationIcon = (type: string) => {
+  const markAllAsRead = async () => {
+    let notificationIds = [] as string[]
+    notifications.map(n => n.isRead === false ? notificationIds.push(n.id) : null)
+
+    setNotifications(prev => 
+      prev.map(n => ({ ...n, isRead: true }))
+    )
+    
+    const response = await Api.markNotificationAsRead(notificationIds)
+
+    if(response && response.data) {
+      console.log('Notificação marcada como lida com sucesso!')
+    }
+
+  }
+
+  const removeNotification = (notificationId: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== notificationId))
+  }
+
+  const getNotificationIcon = (type: NotificationType) => {
     switch (type) {
-      case 'INVITATION_RECEIVED':
-        return <Users className="w-5 h-5 text-blue-500" />
-      case 'APPOINTMENT':
-        return <Calendar className="w-5 h-5 text-green-500" />
+      case NotificationType.INVITATION_RECEIVED:
+        return <Users size={18} className="text-blue-500" />
+      case NotificationType.APPOINTMENT_REMINDER:
+        return <Calendar size={18} className="text-green-500" />
       default:
-        return <Bell className="w-5 h-5 text-gray-500" />
+        return <Bell size={18} className="text-muted-foreground" />
     }
   }
 
@@ -150,154 +169,225 @@ function NotificationsSidebar() {
   const unreadCount = notifications.filter(n => !n.isRead).length
 
   return (
-    <div className="w-80 h-full bg-white border-l border-gray-200 shadow-lg flex flex-col">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-100 bg-gray-50">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Bell className="w-5 h-5 text-gray-700" />
-            <h3 className="font-semibold text-gray-900">
-              Notificações
-            </h3>
-            {unreadCount > 0 && (
-              <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
-                {unreadCount}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-1">
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-            <span className={`text-xs ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
-              {isConnected ? 'Online' : 'Offline'}
-            </span>
-          </div>
-        </div>
-        
-        {!isConnected && (
-          <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded-md">
-            <p className="text-xs text-orange-700 flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              Reconectando ao servidor...
-            </p>
-          </div>
-        )}
-      </div>
+    <>
+      {/* Background overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[60]"
+          onClick={onClose}
+        />
+      )}
 
-      {/* Notifications List */}
-      <div className="flex-1 overflow-y-auto">
-      <button 
-        className="bg-blue-500 text-white px-4 py-2 rounded-md m-4" 
-        onClick={() => setCount(count + 1)}
-        disabled={!isConnected}
+      {/* Notification Sidebar */}
+      <div
+        className={`
+          fixed top-0 right-0 h-screen w-[400px] z-[61]
+          transition-all duration-500 ease-in-out
+          bg-card/95 backdrop-blur-xl border-l border-border/20
+          ${isOpen ? "translate-x-0" : "translate-x-full"}
+        `}
       >
-        CLIQUE AQUI {count} {!isConnected && '(Desconectado)'}
-      </button>
-        {notifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8">
-            <Bell className="w-12 h-12 text-gray-300 mb-4" />
-            <p className="text-sm text-center">Nenhuma notificação ainda</p>
-            <p className="text-xs text-center text-gray-400 mt-1">
-              Você será notificado aqui quando houver novidades
-            </p>
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {notifications.map((notif) => (
-              <div
-                key={notif.id}
-                className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
-                  !notif.isRead ? 'bg-blue-50 border-l-4 border-blue-500' : ''
-                }`}
-                onClick={() => !notif.isRead && markAsRead(notif.id)}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 mt-1">
-                    {getNotificationIcon(notif.type)}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <h4 className={`text-sm font-medium text-gray-900 leading-5 ${
-                        !notif.isRead ? 'font-semibold' : ''
-                      }`}>
-                        {notif.title}
-                      </h4>
-                      {!notif.isRead && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2" />
-                      )}
-                    </div>
-                    
-                    <p className="text-sm text-gray-600 mt-1 leading-5">
-                      {notif.message}
-                    </p>
-                    
-                    <div className="flex items-center justify-between mt-3">
-                      <span className="text-xs text-gray-500">
-                        {formatTimeAgo(notif.createdAt)}
-                      </span>
-                      
-                      {notif.expiresAt && (
-                        <span className="text-xs text-orange-600 flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          Expira em {formatTimeAgo(notif.expiresAt)}
-                        </span>
-                      )}
-                    </div>
+        {/* Decorative gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-bl from-primary/3 via-accent/3 to-chart-3/3 rounded-l-3xl"></div>
 
-                    {/* Action Buttons for Invitations */}
-                    {notif.type === 'INVITATION_RECEIVED' && notif.actionUrl && (
-                      <div className="flex gap-2 mt-3">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleAccept(notif.actionUrl!, notif.id)
-                          }}
-                          disabled={loadingActions.includes(notif.id)}
-                          className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <Check className="w-3 h-3" />
-                          {loadingActions.includes(notif.id) ? 'Aceitando...' : 'Aceitar'}
-                        </button>
-                        
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDecline(notif.actionUrl!, notif.id)
-                          }}
-                          disabled={loadingActions.includes(notif.id)}
-                          className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <X className="w-3 h-3" />
-                          {loadingActions.includes(notif.id) ? 'Rejeitando...' : 'Rejeitar'}
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Generic Action URL */}
-                    {notif.actionUrl && notif.type !== 'INVITATION_RECEIVED' && (
-                      <button className="flex items-center gap-1 mt-2 text-xs text-blue-600 hover:text-blue-800 transition-colors">
-                        Ver detalhes
-                        <ChevronRight className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
+        <div className="relative z-10 h-full flex flex-col">
+          {/* Header */}
+          <div className="p-6 border-b border-border/20">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
+                  <Bell size={20} className="text-primary-foreground" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-foreground">Notificações</h2>
+                  {unreadCount > 0 && (
+                    <span className="text-xs text-muted-foreground">
+                      {unreadCount} não lida{unreadCount !== 1 ? 's' : ''}
+                    </span>
+                  )}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-xl h-10 w-10"
+              >
+                <X size={20} />
+              </Button>
+            </div>
 
-      {/* Footer */}
-      {notifications.length > 0 && (
-        <div className="p-4 border-t border-gray-100 bg-gray-50">
-          <button className="w-full text-sm text-gray-600 hover:text-gray-800 transition-colors">
-            Marcar todas como lidas
-          </button>
+            {/* Connection Status */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+                <span className={`text-xs font-medium ${isConnected ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                  {isConnected ? 'Conectado' : 'Desconectado'}
+                </span>
+              </div>
+              
+            </div>
+
+            {!isConnected && (
+              <div className="mt-3 p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800/30 rounded-xl">
+                <p className="text-xs text-orange-700 dark:text-orange-300 flex items-center gap-2">
+                  <Clock size={12} />
+                  Reconectando ao servidor...
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Notifications List */}
+          <div className="flex-1 overflow-y-auto p-6">
+            {notifications.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <div className="w-16 h-16 bg-secondary/30 rounded-2xl flex items-center justify-center mb-4">
+                  <Bell size={24} className="text-muted-foreground" />
+                </div>
+                <h3 className="text-sm font-medium text-foreground mb-2">Nenhuma notificação</h3>
+                <p className="text-xs text-muted-foreground max-w-[200px]">
+                  Você será notificado aqui quando houver novidades importantes
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`
+                      relative p-4 rounded-xl transition-all duration-200 backdrop-blur-sm border cursor-pointer
+                      ${!notification.isRead 
+                        ? 'bg-primary/5 border-primary/20 hover:bg-primary/10' 
+                        : 'bg-secondary/30 border-border/10 hover:bg-secondary/40'
+                      }
+                    `}
+                    onClick={() => !notification.isRead && markAsRead(notification.id)}
+                  >
+                    {/* Unread indicator */}
+                    {!notification.isRead && (
+                      <div className="absolute top-3 right-3 w-2 h-2 bg-primary rounded-full" />
+                    )}
+
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 mt-0.5">
+                        {getNotificationIcon(notification.type)}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h4 className={`text-sm font-medium text-foreground mb-1 ${!notification.isRead ? 'font-semibold' : ''}`}>
+                          {notification.title}
+                        </h4>
+                        
+                        <p className="text-sm text-muted-foreground mb-2 leading-relaxed">
+                          {notification.message}
+                        </p>
+                        
+                        <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
+                          <span>{formatTimeAgo(notification.createdAt)}</span>
+                          {notification.expiresAt && (
+                            <span className="flex items-center gap-1 text-orange-600 dark:text-orange-400">
+                              <Clock size={10} />
+                              Expira {formatTimeAgo(notification.expiresAt)}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Action Buttons for Invitations */}
+                        {notification.type === NotificationType.INVITATION_RECEIVED && notification.actionUrl && (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleAccept(notification.actionUrl!, notification.id)
+                              }}
+                              disabled={loadingActions.includes(notification.id)}
+                              className="h-7 px-3 text-xs bg-green-600 hover:bg-green-700 text-white"
+                            >
+                              <Check size={12} className="mr-1" />
+                              {loadingActions.includes(notification.id) ? 'Aceitando...' : 'Aceitar'}
+                            </Button>
+                            
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDecline(notification.actionUrl!, notification.id)
+                              }}
+                              disabled={loadingActions.includes(notification.id)}
+                              className="h-7 px-3 text-xs"
+                            >
+                              <X size={12} className="mr-1" />
+                              {loadingActions.includes(notification.id) ? 'Rejeitando...' : 'Rejeitar'}
+                            </Button>
+                          </div>
+                        )}
+
+                        {/* Generic Action for other types */}
+                        {notification.actionUrl && notification.type !== NotificationType.INVITATION_RECEIVED && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-3 text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              // Handle generic action
+                            }}
+                          >
+                            <Info size={12} className="mr-1" />
+                            Ver detalhes
+                          </Button>
+                        )}
+
+                        {/* Remove notification button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            removeNotification(notification.id)
+                          }}
+                          className="absolute top-2 right-6 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-red-100 dark:hover:bg-red-950/30"
+                        >
+                          <TrashBin2 size={12} className="text-red-500" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Footer Actions */}
+          {notifications.length > 0 && (
+            <div className="p-6 border-t border-border/20 space-y-2">
+              {unreadCount > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={markAllAsRead}
+                  className="w-full justify-center"
+                >
+                  <CheckRead size={16} className="mr-2" />
+                  Marcar todas como lidas
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setNotifications([])}
+                className="w-full justify-center text-muted-foreground hover:text-red-600"
+              >
+                <TrashBin2 size={16} className="mr-2" />
+                Limpar todas
+              </Button>
+            </div>
+          )}
         </div>
-      )}
-    </div>
+      </div>
+    </>
   )
 }
 
-export default NotificationsSidebar
+export default NotificationSidebar

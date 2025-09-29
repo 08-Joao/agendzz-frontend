@@ -5,22 +5,22 @@ import { Button } from "@/components/ui/button"
 import ThemeSwitcher from "@/components/theme-switcher";
 import Image from "next/image";
 
-export default function Home() {
+export default function Dashboard() {
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl space-y-6">
         
         {/* Header Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Welcome Card */}
-          <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-8 text-white relative overflow-hidden">
+          <div className="bg-gradient-to-r from-foreground/80 to-foreground rounded-2xl p-8 text-white relative overflow-hidden">
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-2xl">👋</span>
                 <h1 className="text-2xl font-bold">Bem-vindo de volta!</h1>
               </div>
-              <p className="text-gray-300 mb-6 max-w-md">
+              <p className="text-text-inverted mb-6 max-w-md">
                 Você tem X agendamentos hoje.
               </p>
               <button className="bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2">

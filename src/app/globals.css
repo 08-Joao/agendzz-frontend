@@ -9,8 +9,9 @@
   --color-foreground: var(--foreground);
   --color-elevation-1: var(--elevation-1);
   --color-elevation-2: var(--elevation-2);
-  --color-text-primary: var(--text-primary);
-
+  --color-text: var(--text);
+  --color-text-inverted: var(--text-inverted);
+  
   /* Cores da Marca e Acento */
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
@@ -76,79 +77,9 @@
 :root {
   --radius: 0.75rem;
 
-  /* Light Theme - Paleta Azul-Roxo-Rosa Moderna */
-  --elevation-1: #fefefe;
-  --elevation-2: #f8fafc;
-  --text-primary: #64748b;
-
-  /* Cores principais - Gradiente azul para roxo */
-  --primary: #2563eb;
-  --primary-foreground: #ffffff;
-
-  --secondary: #f1f5f9;
-  --secondary-foreground: #1e293b;
-
-  --accent: #8b5cf6;
-  --accent-foreground: #ffffff;
-
-  --tertiary: #f8fafc;
-  --tertiary-foreground: #64748b;
-
-  /* Estados semânticos */
-  --success: #10b981;
-  --success-foreground: #ffffff;
-
-  --error: #ef4444;
-  --error-foreground: #ffffff;
-
-  --warning: #f59e0b;
-  --warning-foreground: #ffffff;
-
-  --info: #3b82f6;
-  --info-foreground: #ffffff;
-
-  /* Bordas e inputs com tom azulado */
-  --border: #e2e8f0;
-  --input: #f1f5f9;
-  --ring: #3b82f6;
-
-  /* Support - Para compatibilidade */
-  --muted: #f8fafc;
-  --muted-foreground: #64748b;
-
-  /* Texts - Para compatibilidade */
-  --text: #1e293b;
-  --text-inverted: #ffffff;
-
-  /* Componentes adicionais */
-  --card: #ffffff;
-  --card-foreground: #1e293b;
-  --popover: #ffffff;
-  --popover-foreground: #1e293b;
-  --destructive: #dc2626;
-
-  /* Charts - Paleta azul-roxo-rosa */
-  --chart-1: #3b82f6;
-  --chart-2: #8b5cf6;
-  --chart-3: #ec4899;
-  --chart-4: #06b6d4;
-  --chart-5: #a855f7;
-
-  /* Sidebar */
-  --sidebar: #ffffff;
-  --sidebar-foreground: #1e293b;
-  --sidebar-primary: #2563eb;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f1f5f9;
-  --sidebar-accent-foreground: #1e293b;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #3b82f6;
-
   /* Font */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --background: #ffffff;
-  --foreground: #1e293b;
 }
 
 /* Dark theme styles when .dark class is present */
