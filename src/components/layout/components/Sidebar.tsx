@@ -1,44 +1,16 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { ChevronDown, ChevronRight, ChevronLeft, Menu, Settings, LogOut, Home, MessageCircle, ClipboardList, Database, Lightbulb } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { sidebarOptions } from './constants/sidebar-settings'
 import { SendSquare, SidebarCode } from '@solar-icons/react/ssr'
 import { useOrganization } from '@/context/OrganizationContext'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 interface SidebarProps {
     isOpen?: boolean
     onClose?: () => void
-    currentPath?: string
-}
-
-// Helper functions for cookies
-const setCookie = (name: string, value: string, days: number) => {
-    let expires = ""
-    if (days) {
-        const date = new Date()
-        date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000)
-        expires = "; expires=" + date.toUTCString()
-    }
-    if (typeof document !== "undefined") {
-        document.cookie = name + "=" + (value || "") + expires + "; path=/"
-    }
-}
-
-const getCookie = (name: string): string | null => {
-    if (typeof document === "undefined") {
-        return null
-    }
-    const nameEQ = name + "="
-    const ca = document.cookie.split(";")
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i]
-        while (c.charAt(0) === " ") c = c.substring(1, c.length)
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length)
-    }
-    return null
 }
 
 // Generate initials from name
@@ -51,20 +23,20 @@ const generateInitials = (name: string): string => {
         .substring(0, 2)
 }
 
-function Sidebar({ isOpen = true, onClose, currentPath = "/" }: SidebarProps) {
+function Sidebar({ isOpen = true, onClose }: SidebarProps) {
     const [isDesktopOpen, setIsDesktopOpen] = useState(true);
+    const pathname = usePathname(); // Use usePathname hook instead of prop
     const { 
-    organizations, 
-    selectedOrganization, 
-    selectOrganization, 
-    isLoading 
-  } = useOrganization()
-
+        organizations, 
+        selectedOrganization, 
+        selectOrganization, 
+        isLoading 
+    } = useOrganization()
 
     useEffect(() => {
         const saved = localStorage.getItem("sidebarCollapsed");
         if (saved !== null)
-            setIsDesktopOpen(saved !== "null");
+            setIsDesktopOpen(saved !== "true");
     }, []);
 
     const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set())
@@ -74,7 +46,7 @@ function Sidebar({ isOpen = true, onClose, currentPath = "/" }: SidebarProps) {
 
     const router = useRouter()
 
-    // Save sidebar state to cookie
+    // Save sidebar state to localStorage
     useEffect(() => {
         localStorage.setItem("sidebarCollapsed", isDesktopOpen ? "false" : "true");
     }, [isDesktopOpen]);
@@ -100,10 +72,16 @@ function Sidebar({ isOpen = true, onClose, currentPath = "/" }: SidebarProps) {
     }
 
     const isActiveRoute = (optionPage: string): boolean => {
+        if (!pathname) return false;
+        
+        // Exact match for home page
         if (optionPage === "/" || optionPage === "") {
-            return currentPath === "/"
+            return pathname === "/"
         }
-        return currentPath.startsWith(optionPage)
+        
+        // For other routes, check if current path starts with the option page
+        // This handles both exact matches and nested routes
+        return pathname === optionPage || pathname.startsWith(optionPage + "/")
     }
 
     const isCategoryCollapsed = (categoryName: string): boolean => {
@@ -165,7 +143,6 @@ function Sidebar({ isOpen = true, onClose, currentPath = "/" }: SidebarProps) {
                 {/* Decorative gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/3 via-accent/3 to-chart-3/3 rounded-r-3xl"></div>
 
-
                 <div className="relative z-10 h-full flex flex-col p-4">
                     {/* Header */}
                     <div className="flex items-center justify-between w-full mb-8">
@@ -187,7 +164,7 @@ function Sidebar({ isOpen = true, onClose, currentPath = "/" }: SidebarProps) {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-56 z-[60] bg-card/95 backdrop-blur-xl border border-border/20" align="start">
                                 <DropdownMenuGroup>
-                                    <DropdownMenuItem className="cursor-pointer rounded-xl">
+                                    <DropdownMenuItem className="cursor-pointer">
                                         <div className="flex justify-center items-center gap-3">
                                             <Settings size={18} />
                                             <span>Configurações</span>
@@ -196,11 +173,11 @@ function Sidebar({ isOpen = true, onClose, currentPath = "/" }: SidebarProps) {
                                 </DropdownMenuGroup>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuGroup>
-                                    {organizations.map((organization, index) => (
+                                    {organizations.map((organization) => (
                                         <DropdownMenuItem
                                             key={organization.id}
                                             onClick={() => selectOrganization(organization.id)}
-                                            className="cursor-pointer rounded-xl"
+                                            className="cursor-pointer"
                                         >
                                             <div className="flex justify-center items-center gap-3">
                                                 <span>{organization.name}</span>
@@ -209,7 +186,7 @@ function Sidebar({ isOpen = true, onClose, currentPath = "/" }: SidebarProps) {
                                     ))}
                                 </DropdownMenuGroup>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
+                                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
                                     <div className="flex justify-center items-center gap-3">
                                         <LogOut size={18} />
                                         <span>Sair</span>

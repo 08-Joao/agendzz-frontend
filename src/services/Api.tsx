@@ -82,6 +82,33 @@ const Api = {
             console.log(e)
         }
     },
+    getOranizationPoints: async function (organizationId: string) {
+        try {
+            const response = await backendRoute.get(`/point/${organizationId}`, { withCredentials: true })
+
+            return response
+        } catch (e) {
+            console.log(e)
+        }
+    },
+    getPointAvailabilityTimes: async function (organizationId: string,pointId: string) {
+        try {
+            const response = await backendRoute.get(`/point/${organizationId}/availability/${pointId}`, { withCredentials: true })
+
+            return response
+        } catch (e) {
+            console.log(e)
+        }
+    },
+    getPointExceptionTimes: async function (organizationId: string,pointId: string) {
+        try {
+            const response = await backendRoute.get(`/point/${organizationId}/exception/${pointId}`, { withCredentials: true })
+
+            return response
+        } catch (e) {
+            console.log(e)
+        }
+    },
     getUserNotifications: async function () {
         try {
             const response = await backendRoute.get('/notifications', { withCredentials: true })

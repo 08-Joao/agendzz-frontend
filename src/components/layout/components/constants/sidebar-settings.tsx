@@ -1,4 +1,4 @@
-import { ChatDots, ClipboardList, Database, Home, Settings, Letter, Calendar, MoneyBag } from "@solar-icons/react/ssr";
+import { ChatDots, ClipboardList, Database, Home, Settings, Letter, Calendar, MoneyBag, Widget, AlarmTurnOff, AlarmAdd } from "@solar-icons/react/ssr";
 
 interface ChildOption {
   name: string
@@ -38,41 +38,31 @@ export const sidebarOptions: MenuOptions = {
       page: "/"
     },
     {
-      name: "Agendamentos",
-      icon: <ClipboardList weight='BoldDuotone' size={20}/>,
-      page: "/agendamentos"
-    },
-    {
       name: "Pontos",
-      icon: <Database weight='BoldDuotone' size={20}/>,
-      page: "/pontos"
+      icon: <Widget weight='BoldDuotone' size={20}/>,
+      page: "/pontos",
+      childs: [
+        {
+          name: "Disponibilidade",
+          icon: <AlarmAdd weight='BoldDuotone' size={16}/>,
+          page: "/points/availability"
+        },
+        {
+          name: "Exceções",
+          icon: <AlarmTurnOff weight='BoldDuotone' size={16}/>,
+          page: "/points/exceptions"
+        }
+      ]
     },
     {
       name: "Produtos",
       icon: <MoneyBag weight='BoldDuotone' size={20}/>,
-      page: "/produtos"
+      page: "/products"
     },
     {
-      name: "Calendário",
+      name: "Agendamentos",
       icon: <Calendar weight='BoldDuotone' size={20}/>,
-      page: "/calendario"
+      page: "/appoinments"
     },
-    {
-      name: "Configurações",
-      icon: <Settings weight='BoldDuotone' size={20}/>,
-      page: "/configuracoes",
-      childs: [
-        {
-          name: "Preferências",
-          icon: <Settings weight='BoldDuotone' size={16}/>,
-          page: "/configuracoes/preferencias"
-        },
-        {
-          name: "Usuários",
-          icon: <Database weight='BoldDuotone' size={16}/>,
-          page: "/configuracoes/usuarios"
-        }
-      ]
-    }
   ]
 }

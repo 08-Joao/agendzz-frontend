@@ -1,8 +1,8 @@
 import { Organization } from "@/dtos/organization.dto";
 import { Product } from "./product.entity";
 import { Appointment } from "./appointment";
-import { Available } from "./available.entity";
-import { Unavailable } from "./unavailable.entity";
+import { AvailabilityEntity } from "./availability.entity";
+import { ExceptionEntity } from "./exception.entity";
 
 export interface Point {
   readonly id: string;
@@ -14,6 +14,6 @@ export interface Point {
   readonly organization: Organization;
   readonly products: Product[];
   readonly appointments: Appointment[];
-  readonly available: Available[];
-  readonly unavailable: Unavailable[];
+  readonly availability: AvailabilityEntity[];
+  readonly exceptions: ExceptionEntity[];
 }

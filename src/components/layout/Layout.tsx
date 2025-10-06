@@ -14,7 +14,7 @@ function Layout({ children }: { children: ReactNode }) {
             <Navbar />
 
             {/* Container do conteúdo principal com rolagem interna */}
-            <div className='flex-1 overflow-y-auto p-8'>
+            <div className='flex-1 overflow-y-auto p-2'>
                 {children}
             </div>
         </main>
