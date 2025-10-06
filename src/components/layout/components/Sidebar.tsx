@@ -6,6 +6,7 @@ import { ChevronDown, ChevronRight, ChevronLeft, Menu, Settings, LogOut, Home, M
 import { useRouter } from 'next/navigation'
 import { sidebarOptions } from './constants/sidebar-settings'
 import { SendSquare, SidebarCode } from '@solar-icons/react/ssr'
+import { useOrganization } from '@/context/OrganizationContext'
 
 interface SidebarProps {
     isOpen?: boolean
@@ -52,7 +53,14 @@ const generateInitials = (name: string): string => {
 
 function Sidebar({ isOpen = true, onClose, currentPath = "/" }: SidebarProps) {
     const [isDesktopOpen, setIsDesktopOpen] = useState(true);
-    
+    const { 
+    organizations, 
+    selectedOrganization, 
+    selectOrganization, 
+    isLoading 
+  } = useOrganization()
+
+
     useEffect(() => {
         const saved = localStorage.getItem("sidebarCollapsed");
         if (saved !== null)
@@ -61,9 +69,8 @@ function Sidebar({ isOpen = true, onClose, currentPath = "/" }: SidebarProps) {
 
     const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set())
     const [collapsedMenuItems, setCollapsedMenuItems] = useState<Set<string>>(new Set())
-    const [organizationName] = useState("Minha Organização")
-
-    const iniciais = generateInitials(organizationName)
+    const organizationName = selectedOrganization?.name || 'Sem organização';
+    const iniciais = generateInitials(organizationName);
 
     const router = useRouter()
 
@@ -186,6 +193,20 @@ function Sidebar({ isOpen = true, onClose, currentPath = "/" }: SidebarProps) {
                                             <span>Configurações</span>
                                         </div>
                                     </DropdownMenuItem>
+                                </DropdownMenuGroup>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuGroup>
+                                    {organizations.map((organization, index) => (
+                                        <DropdownMenuItem
+                                            key={organization.id}
+                                            onClick={() => selectOrganization(organization.id)}
+                                            className="cursor-pointer rounded-xl"
+                                        >
+                                            <div className="flex justify-center items-center gap-3">
+                                                <span>{organization.name}</span>
+                                            </div>
+                                        </DropdownMenuItem>
+                                    ))}
                                 </DropdownMenuGroup>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem onClick={handleLogout} className="cursor-pointer rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">

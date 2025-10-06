@@ -4,8 +4,7 @@ import { NotificationEntity } from '@/entities/notification.entity'
 import { NotificationType } from '@/enums/notificationType'
 import Api from '@/services/Api'
 import { Button } from '@/components/ui/button'
-import React, { useEffect, useState, useRef } from 'react'
-import { io, Socket } from 'socket.io-client'
+import React, { useEffect, useState } from 'react'
 import { 
   Bell, 
   Check, 
@@ -16,6 +15,7 @@ import {
   Info
 } from 'lucide-react'
 import { CheckRead, TrashBin2 } from '@solar-icons/react/ssr'
+import { useWebSocket } from '@/context/NotificationsWebsocketContext'
 
 interface NotificationSidebarProps {
   isOpen: boolean
@@ -24,9 +24,10 @@ interface NotificationSidebarProps {
 
 function NotificationSidebar({ isOpen, onClose }: NotificationSidebarProps) {
   const [notifications, setNotifications] = useState<NotificationEntity[]>([])
-  const [isConnected, setIsConnected] = useState(false)
-  const [loadingActions, setLoadingActions] = useState<string[]>([])
-  const socketRef = useRef<Socket | null>(null)
+  const [loadingActions, setLoadingActions] = useState<Record<string, 'accept' | 'decline'>>({})
+  
+  // Usar o hook do contexto para acessar o socket e o status de conexão
+  const { socket, isConnected } = useWebSocket()
 
   const fetchNotifications = async () => {
     const response = await Api.getUserNotifications()
@@ -37,55 +38,32 @@ function NotificationSidebar({ isOpen, onClose }: NotificationSidebarProps) {
   }
 
   useEffect(() => {
+    // Carregar notificações iniciais
     if(!notifications.length) {
       fetchNotifications()
     }
-
-    // Configurações do socket para reduzir logs de erro
-    const socket = io('http://localhost:4000/notifications', {
-      reconnectionAttempts: 3,
-      reconnectionDelay: 5000,
-      timeout: 3000,
-      forceNew: true,
-      withCredentials: true
-    })
-
-    socketRef.current = socket
-
-    socket.on('connect', () => {
-      setIsConnected(true)
-    })
-
-    socket.on('notification', (newNotification: NotificationEntity) => {
-      setNotifications((prevNotifications) => [newNotification, ...prevNotifications])
-    })
-
-    socket.on('disconnect', (reason) => {
-      setIsConnected(false)
-    })
-
-    socket.on('connect_error', (error) => {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('Erro de conexão com o gateway (modo silencioso):', error.message)
-      }
-      setIsConnected(false)
-    })
-
-    socket.on('reconnect_error', (error) => {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('Erro de reconexão (modo silencioso):', error.message)
-      }
-    })
-
-    return () => {
-      socket.disconnect()
-      socketRef.current = null
-    }
   }, [])
 
+  useEffect(() => {
+    // Configurar listener para novas notificações vindas do Socket.IO
+    if (!socket) return
+
+    const handleNotification = (newNotification: NotificationEntity) => {
+      console.log('📬 Nova notificação recebida:', newNotification)
+      setNotifications((prevNotifications) => [newNotification, ...prevNotifications])
+    }
+
+    // Socket.IO usa .on() para escutar eventos
+    socket.on('notification', handleNotification)
+
+    // Cleanup: remover listener quando o componente desmontar ou socket mudar
+    return () => {
+      socket.off('notification', handleNotification)
+    }
+  }, [socket])
 
   const handleAccept = async (actionUrl: string, notificationId: string) => {
-    setLoadingActions(prev => [...prev, notificationId])
+    setLoadingActions(prev => ({ ...prev, [notificationId]: 'accept' }))
     try {
       const response = await Api.acceptInvitation(actionUrl)
       if (response) {
@@ -95,22 +73,27 @@ function NotificationSidebar({ isOpen, onClose }: NotificationSidebarProps) {
     } catch (error) {
       console.error('Erro ao aceitar convite:', error)
     } finally {
-      setLoadingActions(prev => prev.filter(id => id !== notificationId))
+      setLoadingActions(prev => {
+        const { [notificationId]: _, ...rest } = prev
+        return rest
+      })
     }
   }
 
   const handleDecline = async (actionUrl: string, notificationId: string) => {
-    setLoadingActions(prev => [...prev, notificationId])
+    setLoadingActions(prev => ({ ...prev, [notificationId]: 'decline' }))
     try {
       const response = await Api.declineInvitation(actionUrl)
       if (response) {
-        console.log('Notificação rejeitada com sucesso!')
         setNotifications(prev => prev.filter(n => n.id !== notificationId))
       }
     } catch (error) {
       console.error('Erro ao rejeitar convite:', error)
     } finally {
-      setLoadingActions(prev => prev.filter(id => id !== notificationId))
+      setLoadingActions(prev => {
+        const { [notificationId]: _, ...rest } = prev
+        return rest
+      })
     }
   }
 
@@ -135,7 +118,6 @@ function NotificationSidebar({ isOpen, onClose }: NotificationSidebarProps) {
     if(response && response.data) {
       console.log('Notificação marcada como lida com sucesso!')
     }
-
   }
 
   const removeNotification = (notificationId: string) => {
@@ -225,7 +207,6 @@ function NotificationSidebar({ isOpen, onClose }: NotificationSidebarProps) {
                   {isConnected ? 'Conectado' : 'Desconectado'}
                 </span>
               </div>
-              
             </div>
 
             {!isConnected && (
@@ -256,7 +237,7 @@ function NotificationSidebar({ isOpen, onClose }: NotificationSidebarProps) {
                   <div
                     key={notification.id}
                     className={`
-                      relative p-4 rounded-xl transition-all duration-200 backdrop-blur-sm border cursor-pointer
+                      relative p-4 rounded-xl transition-all duration-200 backdrop-blur-sm border cursor-pointer group
                       ${!notification.isRead 
                         ? 'bg-primary/5 border-primary/20 hover:bg-primary/10' 
                         : 'bg-secondary/30 border-border/10 hover:bg-secondary/40'
@@ -302,11 +283,11 @@ function NotificationSidebar({ isOpen, onClose }: NotificationSidebarProps) {
                                 e.stopPropagation()
                                 handleAccept(notification.actionUrl!, notification.id)
                               }}
-                              disabled={loadingActions.includes(notification.id)}
+                              disabled={!!loadingActions[notification.id]}
                               className="h-7 px-3 text-xs bg-green-600 hover:bg-green-700 text-white"
                             >
                               <Check size={12} className="mr-1" />
-                              {loadingActions.includes(notification.id) ? 'Aceitando...' : 'Aceitar'}
+                              {loadingActions[notification.id] === 'accept' ? 'Aceitando...' : 'Aceitar'}
                             </Button>
                             
                             <Button
@@ -316,11 +297,11 @@ function NotificationSidebar({ isOpen, onClose }: NotificationSidebarProps) {
                                 e.stopPropagation()
                                 handleDecline(notification.actionUrl!, notification.id)
                               }}
-                              disabled={loadingActions.includes(notification.id)}
+                              disabled={!!loadingActions[notification.id]}
                               className="h-7 px-3 text-xs"
                             >
                               <X size={12} className="mr-1" />
-                              {loadingActions.includes(notification.id) ? 'Rejeitando...' : 'Rejeitar'}
+                              {loadingActions[notification.id] === 'decline' ? 'Rejeitando...' : 'Rejeitar'}
                             </Button>
                           </div>
                         )}

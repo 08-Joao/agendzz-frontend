@@ -55,6 +55,15 @@ const Api = {
         console.log(e)
       }  
     },
+    getUserOrganizations: async function () {
+        try {
+            const response = await backendRoute.get('/organization/findUserOrganizations', { withCredentials: true })
+
+            return response
+        }  catch (e) {
+            console.log(e)
+        }
+    },
     acceptInvitation: async function (token: string) {
         try {
             const response = await backendRoute.patch(`/invitation/accept/${token}`, {}, { withCredentials: true })

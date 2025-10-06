@@ -44,7 +44,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true)
       const response = await Api.getMe()
-      console.log(response)
       if (response && 'data' in response) {
         setUser(response.data)
       } else {
@@ -65,7 +64,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(response.data)
         // Navegar imediatamente após setar o usuário
         isNavigatingRef.current = true
-        router.push('/dashboard')
+        router.push('/')
         return true
       }
       return false

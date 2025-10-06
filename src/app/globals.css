@@ -108,7 +108,7 @@
   --success: #22c55e;
   --success-foreground: #ffffff;
 
-  --error: #f87171;
+  --error: #dc2626;
   --error-foreground: #ffffff;
 
   --warning: #fbbf24;
@@ -186,7 +186,8 @@
   --secondary: #f1f5f9;
   --secondary-foreground: #1e293b;
 
-  --destructive: #dc2626;
+  --error: #dc2626;
+
 
   --input: #f1f5f9;
   --ring: #3b82f6;

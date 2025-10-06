@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/context/AuthContext";
+import { NotificationsWebSocketProvider } from "@/context/NotificationsWebsocketContext";
+import { OrganizationProvider } from "@/context/OrganizationContext";
 
 
 const geistSans = Geist({
@@ -32,14 +34,19 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <AuthProvider>
-          <ThemeProvider 
-            attribute="class" 
-            defaultTheme="system" 
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
+          <OrganizationProvider>
+
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <NotificationsWebSocketProvider>
+                {children}
+              </NotificationsWebSocketProvider>
+            </ThemeProvider>
+          </OrganizationProvider>
         </AuthProvider>
       </body>
     </html>
