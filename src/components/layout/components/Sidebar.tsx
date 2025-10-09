@@ -1,10 +1,10 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { ChevronDown, ChevronRight, ChevronLeft, Menu, Settings, LogOut, Home, MessageCircle, ClipboardList, Database, Lightbulb } from 'lucide-react'
+import { ChevronDown, ChevronRight, ChevronLeft, Menu, Settings, LogOut, Home, MessageCircle, ClipboardList, Database, Lightbulb, X } from 'lucide-react'
 import { useRouter, usePathname } from 'next/navigation'
 import { sidebarOptions } from './constants/sidebar-settings'
-import { SendSquare, SidebarCode } from '@solar-icons/react/ssr'
+import { Home2, SendSquare, SidebarCode } from '@solar-icons/react/ssr'
 import { useOrganization } from '@/context/OrganizationContext'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
@@ -23,14 +23,15 @@ const generateInitials = (name: string): string => {
         .substring(0, 2)
 }
 
-function Sidebar({ isOpen = true, onClose }: SidebarProps) {
-    const [isDesktopOpen, setIsDesktopOpen] = useState(true);
-    const pathname = usePathname(); // Use usePathname hook instead of prop
-    const { 
-        organizations, 
-        selectedOrganization, 
-        selectOrganization, 
-        isLoading 
+function Sidebar({ isOpen = false, onClose }: SidebarProps) {
+    const [isDesktopOpen, setIsDesktopOpen] = useState(false);
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
+    const pathname = usePathname();
+    const {
+        organizations,
+        selectedOrganization,
+        selectOrganization,
+        isLoading
     } = useOrganization()
 
     useEffect(() => {
@@ -55,6 +56,14 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         setIsDesktopOpen(prev => !prev)
     }
 
+    const toggleMobileSidebar = () => {
+        setIsMobileOpen(prev => !prev)
+    }
+
+    const closeMobileSidebar = () => {
+        setIsMobileOpen(false)
+    }
+
     const toggleCategory = (categoryName: string) => {
         setCollapsedCategories(prev => {
             const newSet = new Set(prev)
@@ -73,14 +82,11 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
 
     const isActiveRoute = (optionPage: string): boolean => {
         if (!pathname) return false;
-        
-        // Exact match for home page
+       
         if (optionPage === "/" || optionPage === "") {
             return pathname === "/"
         }
-        
-        // For other routes, check if current path starts with the option page
-        // This handles both exact matches and nested routes
+       
         return pathname === optionPage || pathname.startsWith(optionPage + "/")
     }
 
@@ -109,37 +115,59 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
 
     const handleLogout = () => {
         console.log("Logout")
-        // Implement logout logic
     }
 
     const handleNavigate = (page: string) => {
         router.push(page)
+        closeMobileSidebar()
         onClose?.()
     }
 
     return (
         <>
+            {/* 1. BOTÃO FLUTUANTE DE ABRIR (AGORA SÓ APARECE QUANDO A SIDEBAR ESTÁ FECHADA) */}
+            {!isMobileOpen && (
+                <Button
+                    onClick={toggleMobileSidebar}
+                    className="fixed bottom-6 left-6 z-[52] lg:hidden w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-2xl hover:scale-105 transition-all duration-200 border-2 border-primary/20"
+                >
+                    <Home2 size={24} />
+                </Button>
+            )}
+
             {/* Background overlay for mobile */}
-            {isOpen && (
+            {isMobileOpen && (
                 <div
-                    className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[50] lg:hidden"
-                    onClick={onClose}
+                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[50] lg:hidden"
+                    onClick={closeMobileSidebar}
                 />
             )}
 
             {/* Sidebar Container */}
             <div
                 className={`
-          fixed lg:static h-screen flex flex-col z-[51] 
-          transition-all duration-700 ease-in-out
-          bg-card/95 backdrop-blur-xl border-r border-border/20
-          ${isDesktopOpen ? "lg:w-[320px]" : "lg:w-[100px]"}
-          ${isOpen
-                        ? "w-[320px] translate-x-0"
-                        : "w-[320px] -translate-x-full lg:translate-x-0"
+         fixed lg:static h-screen flex flex-col z-[51] 
+         transition-all duration-500 ease-in-out
+         bg-card/95 backdrop-blur-xl border-r border-border/20
+         ${isDesktopOpen ? "lg:w-[320px]" : "lg:w-[100px]"}
+         ${isMobileOpen
+                        ? "w-[85vw] max-w-[320px] translate-x-0 shadow-2xl"
+                        : "w-[85vw] max-w-[320px] -translate-x-full lg:translate-x-0"
                     }
         `}
             >
+                {/* 2. NOVO BOTÃO DE FECHAR (SÓ APARECE NO MOBILE QUANDO A SIDEBAR ESTÁ ABERTA) */}
+                {isMobileOpen && (
+                    <Button
+                        onClick={closeMobileSidebar}
+                        variant="secondary"
+                        size="icon"
+                        className="absolute top-4 -right-5 z-[55] lg:hidden bg-background/80 backdrop-blur-sm border-2 border-border/20 rounded-full h-10 w-10 shadow-lg"
+                    >
+                        <X size={20} />
+                    </Button>
+                )}
+                
                 {/* Decorative gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/3 via-accent/3 to-chart-3/3 rounded-r-3xl"></div>
 
@@ -152,7 +180,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                                     <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center text-sm text-primary-foreground font-bold shadow-lg">
                                         {iniciais}
                                     </div>
-                                    {isDesktopOpen && (
+                                    {(isDesktopOpen || isMobileOpen) && (
                                         <div className="flex items-center justify-center gap-2">
                                             <span className="text-sm font-semibold truncate text-foreground">
                                                 {organizationName}
@@ -218,7 +246,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                             return (
                                 <div key={categoryName} className="space-y-2">
                                     {/* Category Header */}
-                                    {isDesktopOpen && (
+                                    {(isDesktopOpen || isMobileOpen) && (
                                         <button
                                             onClick={() => toggleCategory(categoryName)}
                                             className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold tracking-wider transition-all duration-200 hover:bg-secondary/50 backdrop-blur-sm ${hasActiveOption
@@ -233,7 +261,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
 
                                     {/* Category Items */}
                                     <div
-                                        className={`space-y-1 flex justify-center flex-col ${isDesktopOpen ? "items-start" : "items-center"} transition-all duration-500 ease-in-out overflow-hidden ${collapsed && isDesktopOpen
+                                        className={`space-y-1 flex justify-center flex-col ${(isDesktopOpen || isMobileOpen) ? "items-start" : "items-center"} transition-all duration-500 ease-in-out overflow-hidden ${collapsed && (isDesktopOpen || isMobileOpen)
                                                 ? "max-h-0 opacity-0"
                                                 : "max-h-none opacity-100"
                                             }`}
@@ -244,22 +272,23 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                                             const hasActiveChildItem = hasActiveChild(option)
                                             const itemKey = `${categoryName}-${optionIndex}`
                                             const isItemCollapsed = isMenuItemCollapsed(itemKey)
+                                            const showExpanded = isDesktopOpen || isMobileOpen
 
                                             return (
                                                 <div key={option.name} className="space-y-1 w-full">
                                                     <div className="flex items-center w-full">
                                                         <button
                                                             onClick={() => handleNavigate(option.page)}
-                                                            className={`${isDesktopOpen ? 'flex-1' : 'w-12 h-12'} flex cursor-pointer items-center gap-3 ${isDesktopOpen ? 'px-4 py-3' : 'p-2'} rounded-xl text-sm font-medium transition-all duration-200 backdrop-blur-sm border ${isActive || hasActiveChildItem
+                                                            className={`${showExpanded ? 'flex-1' : 'w-12 h-12'} flex cursor-pointer items-center gap-3 ${showExpanded ? 'px-4 py-3' : 'p-2'} rounded-xl text-sm font-medium transition-all duration-200 backdrop-blur-sm border ${isActive || hasActiveChildItem
                                                                     ? "bg-gradient-to-r from-primary/10 to-accent/5 text-primary border-primary/20 shadow-sm"
                                                                     : "text-muted-foreground hover:text-foreground hover:bg-secondary/40 border-transparent hover:border-border/20"
-                                                                } ${!isDesktopOpen ? "justify-center" : ""}`}
+                                                                } ${!showExpanded ? "justify-center" : ""}`}
                                                         >
                                                             <div className="flex-shrink-0">{option.icon}</div>
-                                                            {isDesktopOpen && <span className="truncate">{option.name}</span>}
+                                                            {showExpanded && <span className="truncate">{option.name}</span>}
                                                         </button>
 
-                                                        {hasChildren && isDesktopOpen && (
+                                                        {hasChildren && showExpanded && (
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
@@ -272,7 +301,7 @@ function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                                                     </div>
 
                                                     {/* Child Items */}
-                                                    {hasChildren && isDesktopOpen && option.childs && (
+                                                    {hasChildren && showExpanded && option.childs && (
                                                         <div
                                                             className={`ml-8 space-y-1 transition-all duration-500 ease-in-out overflow-hidden ${isItemCollapsed
                                                                     ? "max-h-0 opacity-0"

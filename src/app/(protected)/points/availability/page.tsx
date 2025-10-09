@@ -82,6 +82,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import { Plus, X, Save, Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button';
 
 // Types
 interface CreateAvailabilityDto {
@@ -105,26 +106,6 @@ interface Point {
   readonly id: string;
   readonly name: string;
   readonly organizationId: string;
-}
-
-// Componentes auxiliares
-const Button = ({ children, variant = 'default', className = '', onClick, type = 'button' }: any) => {
-  const baseClass = 'px-4 py-2 rounded-md font-medium transition-colors'
-  const variants = {
-    default: 'bg-blue-600 hover:bg-blue-700 text-white',
-    ghost: 'bg-transparent hover:bg-gray-700 text-gray-300',
-    destructive: 'bg-red-600 hover:bg-red-700 text-white',
-    outline: 'border border-gray-600 hover:bg-gray-700 text-gray-300'
-  }
-  return (
-    <button 
-      type={type}
-      onClick={onClick} 
-      className={`${baseClass} ${variants[variant]} ${className}`}
-    >
-      {children}
-    </button>
-  )
 }
 
 const Select = ({ value, onChange, children, className = '' }: any) => (

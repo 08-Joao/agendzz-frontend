@@ -69,8 +69,17 @@ export default function Navbar() {
         <div className="absolute inset-0 bg-gradient-to-r from-primary/3 via-accent/3 to-chart-3/3"></div>
         
         <div className="relative z-10 flex h-16 w-full items-center justify-between px-6 lg:px-8">
-          {/* Left Section - Logo/Brand */}
-
+          {/* Left Section - Mobile Menu Button */}
+          <div className="flex items-center">
+            <Button
+              variant="secondary"
+              size="icon"
+              onClick={toggleMobileMenu}
+              className="lg:hidden rounded-xl h-13 w-13 text-muted-foreground hover:text-foreground hover:bg-secondary/50 backdrop-blur-sm"
+            >
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </Button>
+          </div>
 
           {/* Center Section - Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-1">
@@ -97,13 +106,13 @@ export default function Navbar() {
               variant="secondary"
               size="icon"
               onClick={toggleNotificationSidebar}
-              className={`relative rounded-xl h-10 w-10 backdrop-blur-sm transition-all duration-200 ${
+              className={`relative rounded-xl h-13 w-13 backdrop-blur-sm transition-all duration-200 ${
                 isNotificationSidebarOpen 
                   ? "bg-primary/10 text-primary border-primary/20" 
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary/50 border-transparent"
               }`}
             >
-              <Bell size={18} />
+              <Bell size={20} />
               {/* Notification badge */}
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-card"></div>
             </Button>
@@ -118,22 +127,12 @@ export default function Navbar() {
             {/* User Avatar */}
             <button
               onClick={toggleUserSidebar}
-              className={`w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center text-sm text-primary-foreground font-bold shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 ${
+              className={`w-13 h-13 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center text-sm text-primary-foreground font-bold shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 ${
                 isUserSidebarOpen ? "scale-95 ring-2 ring-primary/50" : "hover:scale-105"
               }`}
             >
-              {generateInitials(user?.name || 'Usuário')}
+              {generateInitials(user?.name || 'Usuário')}
             </button>
-
-            {/* Mobile Menu Button */}
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={toggleMobileMenu}
-              className="lg:hidden rounded-xl h-10 w-10 text-muted-foreground hover:text-foreground hover:bg-secondary/50 backdrop-blur-sm"
-            >
-              {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
-            </Button>
           </div>
         </div>
 
@@ -163,18 +162,6 @@ export default function Navbar() {
                       {link.label}
                     </Link>
                   ))}
-                  
-                  {/* Mobile user info */}
-                  <div className="mt-4 pt-4 border-t border-border/20">
-                    <div className="flex items-center space-x-3 px-4 py-2">
-                      <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center text-xs text-primary-foreground font-bold">
-                        {generateInitials(user?.name || 'Usuário')}
-                      </div>
-                      <span className="text-sm text-foreground font-medium">
-                        {user?.name}
-                      </span>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
