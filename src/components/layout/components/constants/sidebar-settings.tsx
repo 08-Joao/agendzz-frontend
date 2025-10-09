@@ -40,7 +40,7 @@ export const sidebarOptions: MenuOptions = {
     {
       name: "Pontos",
       icon: <Widget weight='BoldDuotone' size={20}/>,
-      page: "/pontos",
+      page: "/points",
       childs: [
         {
           name: "Disponibilidade",
